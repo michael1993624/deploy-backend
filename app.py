@@ -25,11 +25,14 @@ credentials = {
 }
 
 # Facebook OAuth2 configuration
+SERVER_URL = os.environ.get("SERVER_URL")
+CLIENT_URL = os.environ.get("CLIENT_URL")
 FB_CLIENT_ID = os.environ.get('facebook_app_id')
 FB_CLIENT_SECRET = os.environ.get('facebook_secret_key')
-FB_REDIRECT_URI = 'http://localhost:5000/facebook_callback'
+FB_REDIRECT_URI = SERVER_URL + '/facebook_callback'
 FB_AUTHORIZATION_BASE_URL = 'https://www.facebook.com/v17.0/dialog/oauth'
 FB_TOKEN_URL = 'https://graph.facebook.com/v17.0/oauth/access_token'
+
 
 load_dotenv()
 app = Flask(__name__)
@@ -235,7 +238,7 @@ def oauth2callback():
     print(code)
     access = get_access_token(code)
     data = {'refresh_token':code,'access_token':access}
-    urll = f'http://localhost:3000/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
+    urll = f'{CLIENT_URL}/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
     return redirect(urll)
 
 def get_access_token(refresh_token):
@@ -245,7 +248,7 @@ def get_access_token(refresh_token):
             'https://www.googleapis.com/auth/adwords',
         ],
     )
-    flow.redirect_uri = 'http://localhost:5000/oauth2callback'
+    flow.redirect_uri = SERVER_URL + '/oauth2callback'
     flow.fetch_token(code=refresh_token)
     return flow.credentials.token
 
@@ -263,7 +266,7 @@ def oauth2callbackurl():
             'https://www.googleapis.com/auth/adwords',
         ],
     )
-    flow.redirect_uri = 'http://localhost:5000/oauth2callback'
+    flow.redirect_uri = SERVER_URL + '/oauth2callback'
     # flow.run_local_server()
     authorization_url, state = flow.authorization_url(
         access_type='offline',
@@ -340,7 +343,7 @@ def facebook_callback():
         code=code
     )
     access_token = token.get('access_token')
-    urll = f'http://localhost:3000/access_token_and_refresh_token?service_type=facebook&access_token={access_token}'
+    urll = f'{CLIENT_URL}/access_token_and_refresh_token?service_type=facebook&access_token={access_token}'
     return redirect(urll)
 
     
