@@ -1,0 +1,13 @@
+{
+    "installed": {
+        "client_id": "692580919221-ho9olv0hvcarni5ld8edv92u7o8fvq8l.apps.googleusercontent.com",
+        "project_id": "rock-strength-414504",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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",
+        "redirect_uris": [
+            "http://localhost"
+        ]
+    }
+}
