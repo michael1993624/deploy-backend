@@ -14,6 +14,7 @@ google-auth-oauthlib==1.2.0
 googleapis-common-protos==1.62.0
 grpcio==1.62.0
 grpcio-status==1.62.0
+gunicorn
 httplib2==0.22.0
 idna==3.6
 itsdangerous==2.1.2
