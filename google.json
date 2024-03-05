@@ -1,13 +1,17 @@
 {
-    "installed": {
-        "client_id": "692580919221-ho9olv0hvcarni5ld8edv92u7o8fvq8l.apps.googleusercontent.com",
+    "web": {
+        "client_id": "692580919221-riiufu2jcv0dv8nugobh6fj4o8ep7ain.apps.googleusercontent.com",
         "project_id": "rock-strength-414504",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_secret": "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",
+        "client_secret": "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",
         "redirect_uris": [
-            "https://jarrett-googlads-backend-b7e2265d9ee2.herokuapp.com"
-        ]
+            "https://jarrett-googlads-backend-b7e2265d9ee2.herokuapp.com/oauth2callback",
+            "http://localhost",
+            "https://hugh-exercise-juice-search.trycloudflare.com/oauth2callback",
+            "http://localhost:5000/oauth2callback"
+        ],
+        "javascript_origins": ["https://jarrett-googlads-backend-b7e2265d9ee2.herokuapp.com", "http://localhost"]
     }
 }
