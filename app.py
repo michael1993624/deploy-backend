@@ -237,7 +237,7 @@ def oauth2callback():
     print(code)
     access = get_access_token(code)
     data = {'refresh_token':code,'access_token':access}
-    urll = fCLIENT_URL+ '/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
+    urll = CLIENT_URL+ '/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
     return redirect(urll)
 
 def get_access_token(refresh_token):
@@ -342,7 +342,7 @@ def facebook_callback():
         code=code
     )
     access_token = token.get('access_token')
-    urll = fCLIENT_URL+ '/access_token_and_refresh_token?service_type=facebook&refresh_token={code}&access_token={access_token}'
+    urll = CLIENT_URL+ '/access_token_and_refresh_token?service_type=facebook&refresh_token={code}&access_token={access_token}'
     return redirect(urll)
 
     
