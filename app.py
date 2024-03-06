@@ -19,19 +19,20 @@ from requests_oauthlib import OAuth2Session
 credentials = {
     "client_id": os.environ.get('client_id'),
     "client_secret": os.environ.get('client_secret'),
-    "token_uri": "https://oauth2.googleapis.com/token",
+    "token_uri": os.environ.get('token_uri'),
     "developer_token": os.environ.get('developer_token'),
     "use_proto_plus" : True,
 }
+#Redirect URI
+REDIRECT_URI = os.environ.get('redirect_uri')
+FRONTEND_URI = os.environ.get('frontend_uri')
 
 # Facebook OAuth2 configuration
-SERVER_URL = os.environ.get('SERVER_URL')
-CLIENT_URL = os.environ.get('CLIENT_URL')
 FB_CLIENT_ID = os.environ.get('facebook_app_id')
 FB_CLIENT_SECRET = os.environ.get('facebook_secret_key')
-FB_REDIRECT_URI = SERVER_URL + '/facebook_callback'
-FB_AUTHORIZATION_BASE_URL = 'https://www.facebook.com/v17.0/dialog/oauth'
-FB_TOKEN_URL = 'https://graph.facebook.com/v17.0/oauth/access_token'
+FB_REDIRECT_URI = os.environ.get('FB_REDIRECT_URI')
+FB_AUTHORIZATION_BASE_URL = os.environ.get('FB_AUTHORIZATION_BASE_URL')
+FB_TOKEN_URL = os.environ.get('FB_TOKEN_URL')
 
 load_dotenv()
 app = Flask(__name__)
@@ -237,7 +238,7 @@ def oauth2callback():
     print(code)
     access = get_access_token(code)
     data = {'refresh_token':code,'access_token':access}
-    urll = CLIENT_URL+ '/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
+    urll = f'{FRONTEND_URI}/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
     return redirect(urll)
 
 def get_access_token(refresh_token):
@@ -247,7 +248,7 @@ def get_access_token(refresh_token):
             'https://www.googleapis.com/auth/adwords',
         ],
     )
-    flow.redirect_uri = 'https://jarrett-googlads-backend-b7e2265d9ee2.herokuapp.com/oauth2callback'
+    flow.redirect_uri = REDIRECT_URI
     flow.fetch_token(code=refresh_token)
     return flow.credentials.token
 
@@ -265,7 +266,8 @@ def oauth2callbackurl():
             'https://www.googleapis.com/auth/adwords',
         ],
     )
-    flow.redirect_uri = 'https://jarrett-googlads-backend-b7e2265d9ee2.herokuapp.com/oauth2callback'
+
+    flow.redirect_uri = REDIRECT_URI
     # flow.run_local_server()
     authorization_url, state = flow.authorization_url(
         access_type='offline',
@@ -342,7 +344,7 @@ def facebook_callback():
         code=code
     )
     access_token = token.get('access_token')
-    urll = CLIENT_URL+ '/access_token_and_refresh_token?service_type=facebook&refresh_token={code}&access_token={access_token}'
+    urll = f'{FRONTEND_URI}/access_token_and_refresh_token?service_type=facebook&refresh_token={code}&access_token={access_token}'
     return redirect(urll)
 
     
