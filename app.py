@@ -125,8 +125,6 @@ def get_data(customer_id,date,access_token, manager_id):
     start_date = date
     end_date = date
     payload = payload.replace('{start_date}',start_date).replace('{end_date}',end_date)
-    
-        
 
     headers = {
       'developer-token': credentials.get('developer_token'),
@@ -233,9 +231,8 @@ def access_token_and_refresh_token():
 
 @app.route('/oauth2callback')
 def oauth2callback():
-
     code = request.args.get('code')
-    print(code)
+    print("here")
     access = get_access_token(code)
     data = {'refresh_token':code,'access_token':access}
     urll = f'{FRONTEND_URI}/access_token_and_refresh_token?service_type=google&refresh_token={code}&access_token={access}'
@@ -278,7 +275,7 @@ def oauth2callbackurl():
 
 
 @app.route('/get_customer')
-@cross_origin(supports_credentials=True)
+# @cross_origin(supports_credentials=True)
 def get_customer():
     refresh_token = request.headers.get('Authorization')
     if not refresh_token:
@@ -350,7 +347,7 @@ def facebook_callback():
     
 
 
-def get_fb_data(data, date, access_token):
+def get_fb_data(campaign_id, date, access_token):
     import requests
     from datetime import datetime
     date = date.strftime('%Y-%m-%d')
@@ -358,36 +355,33 @@ def get_fb_data(data, date, access_token):
     time_range = {'since': date, 'until': date}
     time_range_str = json.dumps(time_range)
     cost = []
-    for id in data:
-        campaign_id = id['id']
-        url = f"https://graph.facebook.com/v19.0/{campaign_id}/insights"
 
-        params = {
-            'level': 'ad',
-            'time_range': time_range_str,
-            'fields': 'spend',
-            'access_token': access_token
-        }
+    url = f"https://graph.facebook.com/v19.0/{campaign_id}/insights"
 
-        headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': 'ps_l=0; ps_n=0'
-        }
+    params = {
+        'level': 'ad',
+        'time_range': time_range_str,
+        'fields': 'spend',
+        'access_token': access_token
+    }
 
-        response = requests.request("GET", url, headers=headers, params=params)
-        data = response.json()
-        try:
-            total_spend = sum(float(entry['spend']) for entry in data['data'])
-            cost.append(total_spend)
-        except:
-            cost.append(0)
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Cookie': 'ps_l=0; ps_n=0'
+    }
+
+    response = requests.request("GET", url, headers=headers, params=params)
+    data = response.json()
+    try:
+        total_spend = sum(float(entry['spend']) for entry in data['data'])
+        cost.append(total_spend)
+    except:
+        cost.append(0)
     total_spend = sum(cost)
     return total_spend
 
-
-@app.route('/get-fb-campaign-ids', methods=["POST"])
-def get_fb_campaign_id():
-    import requests
+@app.route('/get-fb-data', methods=["POST"])
+def fbdata():
     date_format = "%Y-%m-%d"
     start_date = request.get_json().get('start_date')
     end_date = request.get_json().get('end_date')
@@ -395,20 +389,41 @@ def get_fb_campaign_id():
 
     start_date = convert_str_to_datetime(start_date, date_format)
     end_date = convert_str_to_datetime(end_date, date_format)
+    result_dates = get_dates_between(start_date, end_date)
+    
+    campaign_id = request.get_json().get('id')
+    access_token = request.headers.get('Authorization')
+    result_dates = get_dates_between(start_date, end_date)
+    result = [{'date': date, 'cost': get_fb_data(campaign_id, date, access_token)} for date in result_dates]
+    return result
+
+
+def get_all_data(data):
+    pagination_link = data.get('paging')
+    if 'next' in pagination_link:
+        next_link = pagination_link.get('next')
+        response = requests.get(next_link)
+        data['data'] += response.json().get('data')
+        get_all_data(response.json())
+    return data
+
+@app.route('/get-fb-campaign-ids', methods=["GET"])
+def get_fb_campaign_id():
     
 
+
     access_token = request.headers.get('Authorization')
-    url = f"https://graph.facebook.com/v19.0/me/adaccounts?access_token={access_token}"
+    url = f"https://graph.facebook.com/v19.0/me/adaccounts?fields= business_name,account_id&access_token={access_token}&limit=100000"
 
     payload = {}
     headers = {}
 
     response = requests.request("GET", url, headers=headers, data=payload)
 
-    data = response.json().get('data')
-    result_dates = get_dates_between(start_date, end_date)
-    result = [{'date': date, 'cost': get_fb_data(data, date, access_token)} for date in result_dates]
-    return result
+    all_data = get_all_data(response.json())
+
+    data = all_data.get('data')
+    return data
 
 
 if __name__ == '__main__':
